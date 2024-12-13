@@ -25,7 +25,7 @@
    - 提取关键发现和结论
    - 评估证据强度
 
-3. **智能代理** (`agent/llama_agent.py`)
+3. **智能体** (`agent/llama_agent.py`)
    - 基于LlamaIndex的智能交互
    - 自动任务分解和执行
    - 结果整合和报告生成
@@ -75,6 +75,8 @@
      POSTGRES_CONNECTION=postgresql://user:password@localhost:5432/dbname
      ```
 
+     注意：数据库`dbname`请自行创建
+
 ## 使用说明
 
 ### 交互式模式
@@ -103,28 +105,6 @@ python main.py --query "帮我分析Quercetin对Lung Cancer的疗效"
 - 关键研究发现
 - 证据强度分析
 - 详细参考文献
-
-## 注意事项
-
-1. API使用限制
-   - 请遵守PubMed的API使用政策
-   - 注意OpenAI API的费用计算
-
-2. 数据存储
-   - 定期备份PostgreSQL数据
-   - 监控存储空间使用情况
-
-3. 性能优化
-   - 合理设置批处理大小
-   - 适当配置向量索引参数
-
-## 开发计划
-
-- [ ] 添加更多文献数据源支持
-- [ ] 优化LLM分析准确度
-- [ ] 增加可视化分析功能
-- [ ] 支持批量分析任务
-- [ ] 添加用户权限管理
 
 ## 贡献指南
 
