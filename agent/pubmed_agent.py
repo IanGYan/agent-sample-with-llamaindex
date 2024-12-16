@@ -17,6 +17,9 @@ from tools.literature_analyze import LiteratureAnalyzer
 from memory.vector_store import PubMedVectorStore, AnalysisVectorStore
 
 logger = logging.getLogger(__name__)
+log_level = os.getenv('LOG_LEVEL', 'ERROR')  # 如果未设置，默认使用 ERROR
+numeric_level = getattr(logging, log_level.upper(), logging.ERROR)
+logger.setLevel(numeric_level)  # 设置日志级别为从环境变量中读取的值
 
 class MedLiteratureAnalysisAgent:
     """医学文献分析智能代理类
@@ -54,7 +57,7 @@ class MedLiteratureAnalysisAgent:
 
         try:
             # 设置调试处理器
-            debug_handler = LlamaDebugHandler(print_trace_on_end=True)
+            debug_handler = LlamaDebugHandler(print_trace_on_end=(log_level.upper() == 'DEBUG'))
             callback_manager = CallbackManager([debug_handler])
 
             self.pubmed_tool = PubMedTool(
@@ -148,7 +151,7 @@ class MedLiteratureAnalysisAgent:
 3. 如果没有相关的历史结果，再执行新的分析：
    - 搜索最新的相关文献
    - 分析文献内容
-   - 生成分析报告
+   - 生成分析报告：对于每个化合物，提供治疗效果整体结论；并并列出相关文献的PMID、关键发现的归纳。
 4. 整合所有信息并提供建议
 5. 与用户进行多轮对话，澄清需求或提供补充信息
 

@@ -19,8 +19,11 @@ from llama_index.llms.openai import OpenAI
 from agent.pubmed_agent import MedLiteratureAnalysisAgent
 
 # 配置日志
+log_level = os.getenv('LOG_LEVEL', 'ERROR')  # 如果未设置，默认使用 ERROR
+numeric_level = getattr(logging, log_level.upper(), logging.ERROR)
+
 logging.basicConfig(
-    level=logging.INFO,
+    level=numeric_level,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 
@@ -54,13 +57,6 @@ def main():
 
         # 加载环境变量
         load_dotenv()
-
-        # 设置日志级别
-        log_level = os.getenv('LOG_LEVEL', 'INFO')
-        logging.basicConfig(
-            level=getattr(logging, log_level),
-            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-        )
 
         # 解析命令行参数
         parser = argparse.ArgumentParser(description='医学文献分析系统')
