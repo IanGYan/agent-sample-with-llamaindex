@@ -140,8 +140,10 @@ class AnalysisVectorStore:
                 logger.info("成功存储分析结果")
 
         except Exception as e:
-            logger.error("存储分析结果失败: %s", str(e), exc_info=True)
-            raise
+            # 简化错误信息，只记录关键信息
+            error_msg = f"存储分析结果失败 (compound={compound}, disease={disease}): {str(e)}"
+            logger.error(error_msg)
+            raise RuntimeError(error_msg) from e
 
     def search_similar(self, query_text: str, limit: int = 5) -> List[Tuple[AnalysisMemory, float]]:
         """使用向量相似度搜索相似的分析记录
@@ -247,8 +249,16 @@ class PubMedVectorStore:
                 logger.info("成功存储文献: PMID=%s", article.pmid)
 
         except Exception as e:
-            logger.error("存储文献失败: %s", str(e), exc_info=True)
-            raise
+            # 检查是否是唯一键冲突
+            if "duplicate key value violates unique constraint" in str(e):
+                error_msg = f"文献已存在 (PMID={article.pmid})"
+                logger.warning(error_msg)
+                raise RuntimeError(error_msg) from None  # 使用 from None 简化堆栈跟踪
+            else:
+                # 其他错误
+                error_msg = f"存储文献失败 (PMID={article.pmid}): {str(e)}"
+                logger.error(error_msg)
+                raise RuntimeError(error_msg) from e
 
     def hybrid_search(self, query: str, limit: int = 5) -> List[Tuple[PubMedMemory, float]]:
         """执行混合搜索（关键词 + 语义相似度）

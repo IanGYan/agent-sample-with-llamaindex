@@ -88,9 +88,9 @@
 python main.py --interactive
 ```
 
-在交互式模式下，您可以直接输入自然语言查询，例如：
+在交互式模式下，您可以直接输入自然语言查询，例如：*
 
-- "帮我分析Quercetin对Lung Cancer的疗效"
+- "帮我分析 Quercetin 对 Lung Cancer 的疗效"
 - "分析2020年以来Vitamin D对Depression的研究证据"
 
 ### 命令行模式

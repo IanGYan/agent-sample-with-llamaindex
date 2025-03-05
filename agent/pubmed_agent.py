@@ -143,37 +143,37 @@ class MedLiteratureAnalysisAgent:
                 memory=self.memory,
                 callback_manager=callback_manager,
                 verbose=True,
-                system_prompt="""你是一个专业的医学文献分析助手。你的主要任务是帮助用户分析化合物对特定疾病的治疗效果。
+                system_prompt="""你是一个专业的医学文献分析助手。你的主要任务是帮助用户分析化合物对特定疾病的治疗效果，使用中文回答。
 
 工作流程：
-1. 理解用户的查询意图
-2. 首先查询历史分析结果，避免重复分析
-3. 如果没有相关的历史结果，再执行新的分析：
-   - 搜索最新的相关文献
-   - 分析文献内容
-   - 生成分析报告：对于每个化合物，提供治疗效果整体结论；并并列出相关文献的PMID、关键发现的归纳。
-4. 整合所有信息并提供建议
-5. 与用户进行多轮对话，澄清需求或提供补充信息
+1. 理解用户的查询意图，提取化合物名称和疾病名称
+2. 必须首先使用 query_previous_analyses 工具查询历史分析结果
+3. 只有在以下情况才执行新的分析：
+   - 历史分析结果为空
+   - 或用户明确要求最新分析
+4. 如果需要新分析，按顺序执行：
+   - 使用 search_literature 搜索最新文献
+   - 使用 analyze_literature 分析文献内容
+5. 整合信息并提供建议
 
 注意事项：
-- 优先使用历史分析结果，避免重复工作
-- 主动提出建议和补充问题
-- 解释每个分析步骤
-- 使用专业且易懂的语言
+- 严格遵循先查询历史再考虑新分析的顺序
+- 如果找到历史分析结果，直接使用并告知用户分析时间
+- 明确告知用户是使用历史分析还是新分析
 - 保持对话的连贯性
 
 工具使用说明：
-1. query_previous_analyses: 查询历史分析结果，应该首先使用此工具
-2. search_literature: 用于搜索PubMed文献，需要提供化合物名称和疾病名称
-3. analyze_literature: 分析文献内容，需要提供化合物名称、疾病名称和文献ID列表
-4. search_similar_articles: 搜索相似文献，可以提供关键词查询和过滤条件
+1. query_previous_analyses: 必须首先使用此工具查询历史结果
+2. search_literature: 仅当无历史结果时使用
+3. analyze_literature: 仅当需要新分析时使用
+4. search_similar_articles: 用于补充相似文献搜索
 
 示例查询：
 用户: "帮我分析槲皮素对肺癌的疗效"
-思考: 我应该先查看是否有历史分析结果，如果没有再进行新的分析。
-行动1: 使用query_previous_analyses工具查询历史结果
-行动2: 如果没有相关结果，使用search_literature工具搜索新文献
-行动3: 使用analyze_literature工具分析文献内容
+思考: 提取关键信息：化合物=槲皮素，疾病=肺癌，根据提示确定是否需要search_literature执行新的检索
+行动1: 使用query_previous_analyses查询历史结果
+行动2: 如果有历史结果，直接返回并说明分析时间
+行动3: 如果无历史结果，才执行新的文献分析
 """,
                 task_prompt="请帮助用户分析化合物对疾病的治疗效果。优先查询历史分析结果，如果没有相关结果再进行新的文献分析。"
             )
@@ -312,11 +312,18 @@ class MedLiteratureAnalysisAgent:
                 disease=disease
             )
 
-            # 去掉向量字段
-            results = [{k: v for k, v in analysis.__dict__.items()
-                        if k != 'content_vector'} for analysis in results]
+            # 去掉向量字段，添加格式化的时间信息
+            formatted_results = []
+            for analysis in results:
+                result_dict = {k: v for k, v in analysis.__dict__.items() 
+                              if k != 'content_vector'}
+                # 添加格式化的时间信息
+                if 'created_at' in result_dict:
+                    result_dict['analysis_time'] = result_dict['created_at'].strftime(
+                        '%Y-%m-%d %H:%M:%S')
+                formatted_results.append(result_dict)
 
-            return [analysis for analysis in results]
+            return formatted_results
 
         except Exception as e:
             logger.error("查询历史分析失败: %s", str(e), exc_info=True)
