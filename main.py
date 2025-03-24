@@ -43,6 +43,9 @@ def main():
             "OPENAI_EMBEDDING_MODEL_NAME": "OpenAI嵌入模型名称"
         }
 
+        # 加载环境变量
+        load_dotenv()
+
         missing_vars = []
         env_values = {}
         for var, desc in required_env_vars.items():
@@ -54,9 +57,6 @@ def main():
 
         if missing_vars:
             raise ValueError(f"缺少必要的环境变量或环境变量为空: {', '.join(missing_vars)}")
-
-        # 加载环境变量
-        load_dotenv()
 
         # 解析命令行参数
         parser = argparse.ArgumentParser(description='医学文献分析系统')
